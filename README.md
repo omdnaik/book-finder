@@ -26,7 +26,31 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
+def markdownContent = readFile(env.MARKDOWN_FILE).trim()
+                    
+                    // Handling large content with Groovy
+                    def contentJson = groovy.json.JsonOutput.toJson([
+                        type: 'page',
+                        title: env.NEW_PAGE_TITLE,
+                        ancestors: [[id: env.PARENT_PAGE_ID]],
+                        space: [key: env.SPACE_KEY],
+                        body: [storage: [value: markdownContent, representation: 'markdown']]
+                    ])
 
+                    // Escape double quotes in JSON content
+                    def escapedContent = contentJson.replaceAll('"', '\\"')
+                    
+                    sh """
+                        curl -s -u ${USERNAME}:${PASSWORD} \
+                             -X POST \
+                             -H 'Content-Type: application/json' \
+                             -d '${escapedContent}' \
+                             "${CONFLUENCE_URL}/rest/api/content/"
+                    """
+
+
+
+                    
 
 stage('Publish Markdown as Child Page') {
             steps {
