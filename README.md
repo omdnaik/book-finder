@@ -26,60 +26,31 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
-def markdownContent = readFile(env.MARKDOWN_FILE).trim()
-                    
-                    // Handling large content with Groovy
-                    def contentJson = groovy.json.JsonOutput.toJson([
-                        type: 'page',
-                        title: env.NEW_PAGE_TITLE,
-                        ancestors: [[id: env.PARENT_PAGE_ID]],
-                        space: [key: env.SPACE_KEY],
-                        body: [storage: [value: markdownContent, representation: 'markdown']]
-                    ])
 
-                    // Escape double quotes in JSON content
-                    def escapedContent = contentJson.replaceAll('"', '\\"')
-                    
-                    sh """
-                        curl -s -u ${USERNAME}:${PASSWORD} \
-                             -X POST \
-                             -H 'Content-Type: application/json' \
-                             -d '${escapedContent}' \
-                             "${CONFLUENCE_URL}/rest/api/content/"
-                    """
+name: Check if postinstallscr.dat exists
+      stat:
+        path: /path/to/postinstallscr.dat
+      register: file_stat
 
+    - name: Initialize post_install_file_list if it is not already set
+      set_fact:
+        post_install_file_list: "{{ post_install_file_list | default([]) }}"
+      when: not file_stat.stat.exists or file_stat.stat.size == 0
 
+    - name: Read and process the file content
+      when: file_stat.stat.exists and file_stat.stat.size > 0
+      block:
+        - name: Read the file content
+          slurp:
+            path: /path/to/postinstallscr.dat
+          register: file_content
 
-                    
+        - name: Decode file content from base64 and append lines to the list
+          set_fact:
+            post_install_file_list: "{{ (post_install_file_list + (file_content.content | b64decode | split('\n'))) | unique }}"
 
-stage('Publish Markdown as Child Page') {
-            steps {
-                script {
-                    def markdownContent = readFile(env.MARKDOWN_FILE)
-                    sh(script: """
-                        curl -u ${USERNAME}:${PASSWORD} \
-                             -X POST \
-                             -H 'Content-Type: application/json' \
-                             -d '{
-                                 "type": "page",
-                                 "title": "${NEW_PAGE_TITLE}",
-                                 "ancestors": [
-                                     {
-                                         "id": "${env.PARENT_PAGE_ID}"
-                                     }
-                                 ],
-                                 "body": {
-                                     "storage": {
-                                         "value": "${markdownContent.replaceAll('"', '\\"')}",
-                                         "representation": "markdown"
-                                     }
-                                 }
-                             }' \
-                             "${CONFLUENCE_URL}/rest/api/content/"
-                    """)
-                }
-            }
-        }
-    }
+    - name: Debug the post_install_file_list
+      debug:
+        msg: "Post install file list: {{ post_install_file_list }}"
 
 
