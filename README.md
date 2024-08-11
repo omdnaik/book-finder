@@ -53,4 +53,24 @@ name: Check if postinstallscr.dat exists
       debug:
         msg: "Post install file list: {{ post_install_file_list }}"
 
+- name: Identify the type of an object
+  hosts: localhost
+  tasks:
+    - name: Define an example variable
+      set_fact:
+        example_variable: "{{ ['a', 'b', 'c'] }}"  # Change this to test different types
 
+    - name: Determine the type of example_variable
+      debug:
+        msg: |
+          {% if example_variable is string %}
+            The type of `example_variable` is String
+          {% elif example_variable is number %}
+            The type of `example_variable` is Number
+          {% elif example_variable is mapping %}
+            The type of `example_variable` is Dictionary
+          {% elif example_variable is sequence %}
+            The type of `example_variable` is List
+          {% else %}
+            The type of `example_variable` is Unknown
+          {% endif %}
