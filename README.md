@@ -27,54 +27,7 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
 
-name: Check if postinstallscr.dat exists
-      stat:
-        path: /path/to/postinstallscr.dat
-      register: file_stat
-
-    - name: Initialize post_install_file_list if it is not already set
-      set_fact:
-        post_install_file_list: "{{ post_install_file_list | default([]) }}"
-      when: not file_stat.stat.exists or file_stat.stat.size == 0
-
-    - name: Read and process the file content
-      when: file_stat.stat.exists and file_stat.stat.size > 0
-      block:
-        - name: Read the file content
-          slurp:
-            path: /path/to/postinstallscr.dat
-          register: file_content
-
-        - name: Decode file content from base64 and append lines to the list
-          set_fact:
-            post_install_file_list: "{{ (post_install_file_list + (file_content.content | b64decode | split('\n'))) | unique }}"
-
-    - name: Debug the post_install_file_list
-      debug:
-        msg: "Post install file list: {{ post_install_file_list }}"
-
-- name: Identify the type of an object
-  hosts: localhost
-  tasks:
-    - name: Define an example variable
-      set_fact:
-        example_variable: "{{ ['a', 'b', 'c'] }}"  # Change this to test different types
-
-    - name: Determine the type of example_variable
-      debug:
-        msg: |
-          {% if example_variable is string %}
-            The type of `example_variable` is String
-          {% elif example_variable is number %}
-            The type of `example_variable` is Number
-          {% elif example_variable is mapping %}
-            The type of `example_variable` is Dictionary
-          {% elif example_variable is sequence %}
-            The type of `example_variable` is List
-          {% else %}
-            The type of `example_variable` is Unknown
-          {% endif %}
-Sub AddDateAtCursor()
+ Sub AddDateAtCursor()
     Dim currentDate As String
     Dim cellContent As String
     Dim cursorPosition As Long
