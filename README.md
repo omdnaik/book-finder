@@ -74,3 +74,24 @@ name: Check if postinstallscr.dat exists
           {% else %}
             The type of `example_variable` is Unknown
           {% endif %}
+Sub AddDateAtCursor()
+    Dim currentDate As String
+    Dim cellContent As String
+    Dim cursorPosition As Long
+
+    ' Get current date in your preferred format
+    currentDate = Format(Date, "yyyy-mm-dd") ' Change format as needed
+
+    ' Get active cell content
+    cellContent = ActiveCell.Value
+
+    ' Insert the date at the current cursor position
+    If TypeName(Selection) = "Range" And ActiveCell.HasFormula = False Then
+        If Application.Selection.Text = "" Then
+            ActiveCell.Value = currentDate
+        Else
+            cursorPosition = Application.Selection.Start
+            ActiveCell.Value = Left(cellContent, cursorPosition) & currentDate & Mid(cellContent, cursorPosition + 1)
+        End If
+    End If
+End Sub
