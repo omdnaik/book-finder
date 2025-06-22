@@ -1,5 +1,5 @@
 
-public class BlockingPolicy implements RejectedExecutionHandler {
+`public class BlockingPolicy implements RejectedExecutionHandler {
     @Override
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
         try {
@@ -10,7 +10,7 @@ public class BlockingPolicy implements RejectedExecutionHandler {
             throw new RejectedExecutionException("Interrupted while waiting for queue space", e);
         }
     }
-}
+}`
 
 
 1. priorityexecutors
