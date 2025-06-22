@@ -13,8 +13,65 @@ public class BlockingPolicy implements RejectedExecutionHandler {
 }
 
 
+1. priorityexecutors
+   @Component
+public class PriorityConsumerExecutor<T> {
 
+    private final TaskExecutor taskExecutor;
 
+    public PriorityConsumerExecutor(@Qualifier("priorityExecutor") TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
+
+    public void executeConsumersByPriority(List<PrioritizedConsumer<T>> consumers, T data) {
+        Map<Integer, List<Consumer<T>>> grouped = consumers.stream()
+                .collect(Collectors.groupingBy(
+                        PrioritizedConsumer::priority,
+                        TreeMap::new,  // Sorted by priority ascending
+                        Collectors.mapping(PrioritizedConsumer::consumer, Collectors.toList())
+                ));
+
+        for (List<Consumer<T>> samePriorityConsumers : grouped.values()) {
+            List<CompletableFuture<Void>> futures = samePriorityConsumers.stream()
+                    .map(c -> CompletableFuture.runAsync(() -> c.accept(data), taskExecutor))
+                    .toList();
+
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join(); // Wait for current priority group
+        }
+    }
+}
+
+2  springconfiguration
+
+@Configuration
+public class ExecutorConfig {
+
+    @Bean(name = "priorityExecutor")
+    public ThreadPoolTaskExecutor priorityExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(8);
+        executor.setMaxPoolSize(16);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("priority-exec-");
+        executor.initialize();
+        return executor;
+    }
+}
+
+3. exampleusage
+
+   @Autowired
+private PriorityConsumerExecutor<String> priorityExecutor;
+
+public void test() {
+    List<PrioritizedConsumer<String>> consumers = List.of(
+        new PrioritizedConsumer<>(1, val -> log.info("P1-A: " + val)),
+        new PrioritizedConsumer<>(2, val -> log.info("P2-A: " + val)),
+        new PrioritizedConsumer<>(1, val -> log.info("P1-B: " + val))
+    );
+
+    priorityExecutor.executeConsumersByPriority(consumers, "DEAL-001");
+}
 
 # BookFinder
 
