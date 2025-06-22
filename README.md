@@ -1,3 +1,21 @@
+
+public class BlockingPolicy implements RejectedExecutionHandler {
+    @Override
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+        try {
+            // Blocks until queue has space
+            executor.getQueue().put(r);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RejectedExecutionException("Interrupted while waiting for queue space", e);
+        }
+    }
+}
+
+
+
+
+
 # BookFinder
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.0.4.
