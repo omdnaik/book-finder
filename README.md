@@ -1,3 +1,37 @@
+
+#!/bin/bash
+
+# Input file with list of filenames (1 per line)
+INPUT_FILE="file_list.txt"
+
+# Source directory (where files are currently located)
+SOURCE_DIR="/path/to/source"
+
+# Target directory (where you want to move files)
+TARGET_DIR="/path/to/destination"
+
+# Create target directory if it doesn't exist
+mkdir -p "$TARGET_DIR"
+
+# Read and move files
+while IFS= read -r filename; do
+  # Skip empty lines
+  [ -z "$filename" ] && continue
+
+  # Full path of the file
+  src="$SOURCE_DIR/$filename"
+  dest="$TARGET_DIR/$filename"
+
+  if [ -f "$src" ]; then
+    mv "$src" "$dest"
+    echo "Moved: $filename"
+  else
+    echo "File not found: $filename"
+  fi
+done < "$INPUT_FILE"
+
+
+
 public class MurmurHash3 {
     public static int hash32(String key) {
         byte[] data = key.getBytes();
