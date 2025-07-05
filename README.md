@@ -1,3 +1,64 @@
+
+<configuration>
+  <property name="LOG_DIR" value="logs" />
+
+  <!-- Appender for File Processor -->
+  <appender name="FILE_PROCESSOR_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/file-processor.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/file-processor.%d{yyyy-MM-dd}.log</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Appender for Deal Processor -->
+  <appender name="DEAL_PROCESSOR_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/deal-processor.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/deal-processor.%d{yyyy-MM-dd}.log</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Appender for XML Generator -->
+  <appender name="XML_GENERATOR_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${LOG_DIR}/xml-generator.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>${LOG_DIR}/xml-generator.%d{yyyy-MM-dd}.log</fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Logger bindings -->
+  <logger name="com.yourapp.fileprocessor" level="INFO" additivity="false">
+    <appender-ref ref="FILE_PROCESSOR_APPENDER" />
+  </logger>
+
+  <logger name="com.yourapp.dealprocessor" level="INFO" additivity="false">
+    <appender-ref ref="DEAL_PROCESSOR_APPENDER" />
+  </logger>
+
+  <logger name="com.yourapp.xmlgenerator" level="INFO" additivity="false">
+    <appender-ref ref="XML_GENERATOR_APPENDER" />
+  </logger>
+
+  <!-- Root logger -->
+  <root level="WARN">
+    <!-- you can add general appender here if needed -->
+  </root>
+</configuration>
+
+
+
+
+
+
 =MID(A1,FIND("☼",SUBSTITUTE(A1,".","☼",LEN(A1)-LEN(SUBSTITUTE(A1,".",""))))+1,FIND("_",A1)-FIND("☼",SUBSTITUTE(A1,".","☼",LEN(A1)-LEN(SUBSTITUTE(A1,".",""))))-1)
 
 
