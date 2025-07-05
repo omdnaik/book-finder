@@ -1,4 +1,7 @@
 
+=TRIM(MID(A1,FIND("☼",SUBSTITUTE(A1,".","☼",LEN(A1)-LEN(SUBSTITUTE(A1,".",""))-1))+1,FIND("☼",SUBSTITUTE(A1,".","☼",LEN(A1)-LEN(SUBSTITUTE(A1,".",""))))-FIND("☼",SUBSTITUTE(A1,".","☼",LEN(A1)-LEN(SUBSTITUTE(A1,".",""))-1))-1))
+
+
 #!/bin/bash
 
 # Input file with list of filenames (1 per line)
