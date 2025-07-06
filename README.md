@@ -1,5 +1,31 @@
 
 <configuration>
+  <appender name="THREAD_LOGS" class="ch.qos.logback.classic.sift.SiftingAppender">
+    <discriminator class="ch.qos.logback.classic.sift.MDCBasedDiscriminator">
+      <key>threadName</key>
+      <defaultValue>default-thread</defaultValue>
+    </discriminator>
+    
+    <sift>
+      <appender name="FILE-${threadName}" class="ch.qos.logback.core.FileAppender">
+        <file>logs/${threadName}.log</file>
+        <append>true</append>
+        <encoder>
+          <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+      </appender>
+    </sift>
+  </appender>
+
+  <root level="DEBUG">
+    <appender-ref ref="THREAD_LOGS"/>
+  </root>
+</configuration>
+
+
+
+
+<configuration>
   <property name="LOG_DIR" value="logs" />
 
   <!-- Appender for File Processor -->
