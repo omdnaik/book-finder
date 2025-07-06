@@ -1,3 +1,54 @@
+<configuration>
+    <property name="LOG_DIR" value="logs"/>
+
+    <!-- Async Sifting Appender -->
+    <appender name="ASYNC_SIFT" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="SIFT" />
+        <queueSize>2048</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>false</includeCallerData>
+    </appender>
+
+    <!-- Sifting Appender by Thread -->
+    <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator class="ch.qos.logback.classic.sift.MDCBasedDiscriminator">
+            <key>threadName</key>
+            <defaultValue>unknown-thread</defaultValue>
+        </discriminator>
+        <sift>
+            <appender name="THREAD-${threadName}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>${LOG_DIR}/${threadName}.log</file>
+                <append>true</append>
+                <encoder>
+                    <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+                </encoder>
+
+                <!-- Rolling Policy -->
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <fileNamePattern>${LOG_DIR}/${threadName}.%d{yyyy-MM-dd_HH}.log.gz</fileNamePattern>
+                    <maxHistory>48</maxHistory>
+                    <cleanHistoryOnStart>true</cleanHistoryOnStart>
+                </rollingPolicy>
+
+                <!-- Performance -->
+                <immediateFlush>false</immediateFlush>
+                <bufferedIO>true</bufferedIO>
+                <bufferSize>8192</bufferSize>
+            </appender>
+        </sift>
+    </appender>
+
+    <!-- Root logger uses async+sifting -->
+    <root level="INFO">
+        <appender-ref ref="ASYNC_SIFT"/>
+    </root>
+</configuration>
+
+
+
+
+
+
 
 <configuration>
   <appender name="THREAD_LOGS" class="ch.qos.logback.classic.sift.SiftingAppender">
