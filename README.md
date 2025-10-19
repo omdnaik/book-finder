@@ -1,3 +1,216 @@
+
+
+Perfect — let’s deep-dive into how all the pieces work together at runtime:
+how your functional interface, method references, and registry interconnect inside Spring Boot.
+I’ll explain it step-by-step, building from the ground up 👇
+
+
+---
+
+⚙️ 1️⃣ ValidationStep — The Functional Interface
+
+@FunctionalInterface
+public interface ValidationStep {
+    ValidationResult validate(ReceiptFile file);
+}
+
+✅ What this means
+
+A functional interface is any interface with exactly one abstract method.
+
+This allows it to be used as a lambda expression or method reference target.
+
+Here, the single method validate(ReceiptFile) takes a file and returns a ValidationResult.
+
+
+💡 In simpler words
+
+You can assign any method that matches this signature (ReceiptFile → ValidationResult) to a variable of type ValidationStep.
+
+For example:
+
+ValidationStep step = this::validateHeader;
+
+is equivalent to:
+
+ValidationStep step = (file) -> validateHeader(file);
+
+So this::validateHeader is just syntactic sugar for a lambda that calls that method.
+
+
+---
+
+🧩 2️⃣ Product Validator (e.g., DepositFileValidator)
+
+@Component
+public class DepositFileValidator implements FileValidator {
+
+    @Override
+    public List<ValidationStep> getValidationSteps() {
+        return List.of(
+            this::validateHeader,
+            this::validateProductCode,
+            this::validateFieldLengths
+        );
+    }
+
+    private ValidationResult validateHeader(ReceiptFile file) { ... }
+    private ValidationResult validateProductCode(ReceiptFile file) { ... }
+    private ValidationResult validateFieldLengths(ReceiptFile file) { ... }
+}
+
+✅ What happens here
+
+Each method like validateHeader has the same signature as ValidationStep::validate.
+
+When you write this::validateHeader, Java automatically wraps that method as a ValidationStep instance.
+
+So List<ValidationStep> actually contains 3 functional objects, each pointing to one of those methods.
+
+
+💡 Internally
+
+Each method reference becomes a small object that remembers:
+
+1. The target instance (this, i.e. DepositFileValidator), and
+
+
+2. The method to call (validateHeader).
+
+
+
+When you later call step.validate(file) — it just delegates to validateHeader(file) on the same instance.
+
+
+---
+
+🧠 3️⃣ Registry: FileValidatorRegistry
+
+@Component
+public class FileValidatorRegistry {
+
+    private final Map<String, FileValidator> validatorMap;
+
+    public FileValidatorRegistry(List<FileValidator> validators) {
+        this.validatorMap = validators.stream()
+            .collect(Collectors.toMap(FileValidator::getKey, Function.identity()));
+    }
+
+    public FileValidator getValidator(String product, String event) {
+        return validatorMap.getOrDefault(product + ":" + event, new DefaultNoOpValidator());
+    }
+}
+
+✅ What Spring does
+
+Spring scans all beans implementing the FileValidator interface.
+
+It injects them as a List<FileValidator> into this registry constructor.
+
+The registry creates a lookup map keyed by product and event type.
+
+
+So, at runtime:
+
+validatorMap = {
+  "DEPOSIT:NEW" -> DepositFileValidator,
+  "SWAP:UPDATE" -> SwapFileValidator
+}
+
+💡 Why this works beautifully
+
+No if/else chains.
+
+No manual wiring.
+
+Adding a new product validator = just add a new Spring bean implementing FileValidator.
+
+
+
+---
+
+🔄 4️⃣ Orchestration: ValidatorService
+
+@Service
+public class ValidatorService {
+
+    private final FileValidatorRegistry registry;
+
+    public ValidatorService(FileValidatorRegistry registry) {
+        this.registry = registry;
+    }
+
+    public ValidationResult validate(ReceiptFile file) {
+        FileValidator validator = registry.getValidator(file.getProduct(), file.getEvent());
+        List<ValidationStep> steps = validator.getValidationSteps();
+
+        for (ValidationStep step : steps) {
+            ValidationResult result = step.validate(file);
+            if (!result.isValid()) return result; // early exit on failure
+        }
+        return ValidationResult.ok();
+    }
+}
+
+✅ What happens at runtime
+
+1. A ReceiptFile arrives with product="DEPOSIT", event="NEW".
+
+
+2. ValidatorService asks the registry for the right validator → returns DepositFileValidator.
+
+
+3. Calls getValidationSteps() → gets list [this::validateHeader, this::validateProductCode, this::validateFieldLengths].
+
+
+4. Iterates that list:
+
+Calls step.validate(file) → executes the actual method behind the reference.
+
+
+
+
+So it dynamically executes each method without ever hardcoding which ones exist.
+
+
+---
+
+🧬 5️⃣ Wiring Recap — End-to-End Flow
+
+[FileProcessorService]
+        │
+        ▼
+[ValidatorService]
+        │
+        ▼
+[FileValidatorRegistry] → provides appropriate validator
+        │
+        ▼
+[DepositFileValidator]
+        │
+        ▼
+[List<ValidationStep>] → [this::validateHeader, this::validateProductCode, ...]
+        │
+        ▼
+Executed Sequentially in ValidatorService
+
+
+---
+
+🏗️ 6️⃣ Why It’s So Powerful
+
+Concept	Benefit
+
+Functional Interface (ValidationStep)	Enables method references → simpler, cleaner validator logic.
+Method References	Compact representation of each validation rule, with no boilerplate.
+Registry Pattern	Decouples lookup logic from execution; allows new validators to be added easily.
+Spring Boot Autowiring	Automatically collects all FileValidator beans into the registry.
+Single Orchestrator	Uniform handling, logging, and error propagation across all products.
+
+
+
+
+
 <configuration>
     <property name="LOG_DIR" value="logs"/>
 
