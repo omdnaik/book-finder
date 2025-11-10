@@ -1,3 +1,103 @@
+
+yes.
+
+Here are 3 slide bodies.
+Clean, concise, NOT repeating your earlier table.
+
+You just paste your code snippets under these points.
+
+
+---
+
+SLIDE 1 — MODULAR DESIGN (OLD → NEW)
+
+Old application
+
+logic distributed in pockets across codebase
+
+same business concept implemented differently in multiple places
+
+
+New application
+
+business behaviour isolated as modules that plug into a stable core
+
+if a new product/event comes tomorrow → just “introduce a module”, core remains untouched
+
+
+Value message
+
+we now evolve by addition, not by modification
+
+
+
+---
+
+SLIDE 2 — SCALABILITY (OLD → NEW)
+
+Old application
+
+scale was bound to physical instances
+
+pushing throughput required more servers, more infra, more cost
+
+
+New application
+
+scale is pushed through thread pools and executors
+
+throughput is controlled at configuration level (thread pool sizing per flow)
+
+
+Value message
+
+scale has become a config problem, not an infra procurement problem
+
+
+
+---
+
+SLIDE 3 — MAINTENANCE (OLD → NEW)
+
+Old application
+
+code-level changes for every behaviour variation
+
+high risk of regression because business rules lived in code
+
+
+New application
+
+rules/data are externalized into config / template / registry
+
+code becomes a stable platform, configs carry the business variation
+
+
+Value message
+
+maintenance becomes predictable & low-risk, delivery cycles reduce naturally
+
+
+
+---
+
+NOTE
+
+all 3 value messages are different narratives:
+
+1. evolve by addition
+
+
+2. scale by config, not infra
+
+
+3. stabilize code, vary config
+
+
+
+That ties perfectly with CTO expectations:
+change faster, scale cheaper, break less.
+
 <!-- <svg xmlns="http://www.w3.org/2000/svg" width="1400" viewBox="0 0 1400 950">
   <title>system-arch.svg</title>
   <style>
