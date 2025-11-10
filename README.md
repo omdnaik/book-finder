@@ -1,4 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" viewBox="0 0 1400 950">
+  <title>system-arch.svg</title>
+  <style>
+    .bandLabel { font: 700 22px Inter, Helvetica, Arial, sans-serif; fill: #cccccc; }
+    .box { fill:#fff; stroke:#999; stroke-width:1.5; rx:12; ry:12; }
+    .yellow { fill:#FCECC8; }
+    .blue { fill:#CDE1FF; }
+    .green { fill:#CDEECB; rx:20; ry:20; }
+    .label { font:600 12px Inter, Helvetica, Arial, sans-serif; fill:#333; }
+    .note { font:italic 12px Inter, Helvetica, Arial, sans-serif; fill:#555; }
+    .callout { fill:#CDEECB; stroke:#999; stroke-width:1; rx:12; ry:12; }
+    .infra { fill:none; stroke:#ddd; stroke-width:1.5; stroke-dasharray:6 4; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+    </marker>
+  </defs>
 
+  <!-- Band labels -->
+  <text class="bandLabel" x="60" y="150">Ingestion</text>
+  <text class="bandLabel" x="60" y="320">Processing</text>
+  <text class="bandLabel" x="60" y="490">Transformation</text>
+  <text class="bandLabel" x="60" y="660">XML Generation</text>
+  <text class="bandLabel" x="60" y="830">Infrastructure</text>
+
+  <!-- Vertical pipeline spine -->
+  <path d="M500,100 L500,720" stroke="#666" stroke-width="2.5" fill="none" marker-end="url(#arrow)"/>
+
+  <!-- Ingestion -->
+  <rect class="box" x="380" y="80" width="240" height="50"/>
+  <text class="label" x="500" y="108" text-anchor="middle">FileWatcher</text>
+
+  <rect class="box blue" x="380" y="140" width="240" height="50"/>
+  <text class="label" x="500" y="168" text-anchor="middle">FileQueueManager</text>
+
+  <rect class="box yellow" x="380" y="200" width="240" height="50"/>
+  <text class="label" x="500" y="228" text-anchor="middle">FileProcessor</text>
+
+  <text class="note" x="650" y="235">Consistent hashing → group same systemId+version</text>
+
+  <!-- Processing -->
+  <rect class="box yellow" x="380" y="280" width="240" height="50"/>
+  <text class="label" x="500" y="308" text-anchor="middle">ValidatorService</text>
+
+  <rect class="box green" x="650" y="280" width="230" height="50"/>
+  <text class="label" x="765" y="308" text-anchor="middle">FileValidator Registry</text>
+
+  <text class="note" x="650" y="340">Validation results persisted before transformation</text>
+
+  <!-- Transformation -->
+  <rect class="box blue" x="380" y="430" width="240" height="50"/>
+  <text class="label" x="500" y="458" text-anchor="middle">DealProcessor</text>
+
+  <rect class="box green" x="650" y="430" width="230" height="50"/>
+  <text class="label" x="765" y="458" text-anchor="middle">Processor Registry (product+event)</text>
+
+  <text class="note" x="650" y="490">Executes field-level transformation steps in parallel (intra-deal)</text>
+
+  <!-- XML Generation -->
+  <rect class="box yellow" x="380" y="600" width="240" height="50"/>
+  <text class="label" x="500" y="628" text-anchor="middle">XMLGenerator</text>
+
+  <rect class="box blue" x="650" y="600" width="230" height="80"/>
+  <text class="label" x="765" y="625" text-anchor="middle">Database</text>
+  <text class="note" x="650" y="650">Stores mappings, transformation methods &amp; templates</text>
+
+  <text class="note" x="100" y="650">Configurable XML templates — product/event driven, extensible</text>
+
+  <!-- Callouts right side -->
+  <rect class="callout" x="1000" y="140" width="300" height="54"/>
+  <text class="label" x="1150" y="172" text-anchor="middle">Scalability • Configurability • Observability</text>
+
+  <text class="note" x="1000" y="230">MDC Log Context near DealProcessor</text>
+
+  <rect class="box" x="1000" y="600" width="300" height="60"/>
+  <text class="label" x="1150" y="625" text-anchor="middle">Patterns:</text>
+  <text class="label" x="1150" y="642" text-anchor="middle">Registry • Strategy • Template Method</text>
+  <text class="label" x="1150" y="659" text-anchor="middle">Builder • Factory</text>
+
+  <rect class="box" x="1000" y="670" width="300" height="70"/>
+  <text class="label" x="1150" y="695" text-anchor="middle">Tech:</text>
+  <text class="label" x="1150" y="712" text-anchor="middle">Spring Boot 3.x, Java 17, Oracle 19c (JDBC/HikariCP)</text>
+  <text class="label" x="1150" y="729" text-anchor="middle">Java Executors, Spring Batch (optional)</text>
+
+  <!-- Infrastructure band -->
+  <rect class="infra" x="150" y="800" width="1100" height="110"/>
+  <text class="label" x="300" y="840" text-anchor="middle">ConsistentHashingExecutor</text>
+  <text class="label" x="600" y="840" text-anchor="middle">Parallel Consumer Execution</text>
+  <text class="label" x="900" y="840" text-anchor="middle">Configurable Behavior</text>
+  <text class="label" x="1200" y="840" text-anchor="middle">Metrics</text>
+</svg>
 
 Perfect — let’s deep-dive into how all the pieces work together at runtime:
 how your functional interface, method references, and registry interconnect inside Spring Boot.
