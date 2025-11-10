@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1400" viewBox="0 0 1400 950">
+<!-- <svg xmlns="http://www.w3.org/2000/svg" width="1400" viewBox="0 0 1400 950">
   <title>system-arch.svg</title>
   <style>
     .bandLabel { font: 700 22px Inter, Helvetica, Arial, sans-serif; fill: #cccccc; }
@@ -91,6 +91,7 @@
   <text class="label" x="900" y="840" text-anchor="middle">Configurable Behavior</text>
   <text class="label" x="1200" y="840" text-anchor="middle">Metrics</text>
 </svg>
+-->
 
 Perfect — let’s deep-dive into how all the pieces work together at runtime:
 how your functional interface, method references, and registry interconnect inside Spring Boot.
